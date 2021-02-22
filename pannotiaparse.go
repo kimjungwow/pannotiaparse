@@ -82,7 +82,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 			words := Create(line, punctuation)
 			for _, pch := range words {
-				fmt.Println(pch)
+				// fmt.Println(pch)
 				head := lineno
 				tail, _ := strconv.Atoi(pch)
 				if tail <= 0 {
