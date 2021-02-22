@@ -1,4 +1,4 @@
-package pannotia
+package pannotiaparse
 
 import (
 	"bufio"
