@@ -7,11 +7,13 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 )
 
 type CsrArraysT struct {
-	RowArray, ColArray, dataArray, colCnt []int
+	ColArray, dataArray, colCnt []int32
+	RowArray                    []int32
 }
 
 func (a *CsrArraysT) freeArrays() {
@@ -35,18 +37,17 @@ type ellArraysT struct {
 }
 
 type cooedgetuple struct {
-	row, col, val int
+	row, col, val int32
 }
 
 func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
 	cnt := 0
 	numEdges := 0
 	numNodes := 0
-	var colCnt []int
+	var colCnt []int32
 
 	var tupleArray []cooedgetuple
 	file, err := os.Open(tmpchar)
-	// file, err := os.Open("/path/to/file.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,7 +65,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		}
 		if lineno == 0 {
 			fmt.Sscanf(line, "%d %d", pNumNodes, pNumEdges)
-			colCnt = make([]int, *pNumNodes)
+			colCnt = make([]int32, *pNumNodes)
 
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
@@ -75,30 +76,32 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			numNodes = *pNumNodes
 			numEdges = *pNumEdges
 
-			print("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
+			fmt.Printf("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
 			tupleArray = make([]cooedgetuple, numEdges)
 		} else { //from the second line
 			var punctuation = []rune{'.', '-', ',', ' '}
 
 			words := Create(line, punctuation)
 			for _, pch := range words {
-				head := lineno
+				// fmt.Println(pch)
+				head := int32(lineno)
 				tail, _ := strconv.Atoi(pch)
 				if tail <= 0 {
 					break
 				}
 
-				if tail == head {
+				if int32(tail) == head {
 					print("reporting self loop: %d, %d\n", lineno+1, lineno)
 				}
 
 				temp.row = head - 1
-				temp.col = tail - 1
-				temp.val = weight
+				temp.col = int32(tail) - 1
+				temp.val = int32(weight)
 
 				colCnt[head-1]++
-				cnt++
+
 				tupleArray[cnt] = temp
+				cnt++
 
 			}
 		}
@@ -111,27 +114,36 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		log.Fatal(err)
 	}
 
-	RowArray := make([]int, numNodes+1)
-	ColArray := make([]int, numEdges)
-	dataArray := make([]int, numEdges)
+	sort.Slice(tupleArray[:numEdges], func(i, j int) bool {
+		return tupleArray[i].row < tupleArray[j].row
+	})
+
+	RowArray := make([]int32, numNodes+1)
+	ColArray := make([]int32, numEdges)
+	dataArray := make([]int32, numEdges)
 
 	rowCnt := 0
 	prev := -1
 	var idx int
 	for idx = 0; idx < numEdges; idx++ {
-		curr := tupleArray[idx].row
+		curr := int(tupleArray[idx].row)
 		if curr != prev {
+
+			RowArray[rowCnt] = int32(idx)
 			rowCnt++
-			RowArray[rowCnt] = idx
 			prev = curr
 		}
 		ColArray[idx] = tupleArray[idx].col
 		dataArray[idx] = tupleArray[idx].val
 
 	}
-	RowArray[rowCnt] = idx
+	RowArray[rowCnt] = int32(idx)
 
 	csr := new(CsrArraysT)
+	csr.RowArray = make([]int32, numNodes+1)
+	csr.ColArray = make([]int32, numEdges)
+	csr.dataArray = make([]int32, numEdges)
+	csr.colCnt = make([]int32, *pNumNodes)
 	csr.RowArray = RowArray
 	csr.ColArray = ColArray
 	csr.dataArray = dataArray
