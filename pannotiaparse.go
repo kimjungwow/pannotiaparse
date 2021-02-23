@@ -67,6 +67,10 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			fmt.Sscanf(line, "%d %d", pNumNodes, pNumEdges)
 			colCnt = make([]int32, *pNumNodes)
 
+			for i := 0; i < *pNumNodes; i++ {
+				colCnt[i] = 0
+			}
+
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
 				print("This is an undirected graph\n")
