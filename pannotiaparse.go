@@ -52,8 +52,10 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	}
 	defer file.Close()
 
+	fmt.Printf("Opening file: %s\n", tmpchar)
+
 	scanner := bufio.NewScanner(file)
-	lineno := 0
+	lineno := uint(0)
 	for scanner.Scan() {
 		weight := 0
 		var temp cooedgetuple
@@ -71,10 +73,10 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			}
 
 			if !directed {
-				*pNumEdges = *pNumEdges * 2
-				print("This is an undirected graph\n")
+				*pNumEdges *= 2
+				fmt.Printf("This is an undirected graph\n")
 			} else {
-				print("This is a directed graph\n")
+				fmt.Printf("This is a directed graph\n")
 			}
 			numNodes = *pNumNodes
 			numEdges = *pNumEdges
@@ -87,24 +89,24 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			words := Create(line, punctuation)
 			for _, pch := range words {
 				// fmt.Println(pch)
-				head := int32(lineno)
+				head := int(lineno)
 				tail, _ := strconv.Atoi(pch)
 				if tail <= 0 {
 					break
 				}
 
-				if int32(tail) == head {
+				if tail == head {
 					print("reporting self loop: %d, %d\n", lineno+1, lineno)
 				}
 
-				temp.row = head - 1
+				temp.row = int32(head) - 1
 				temp.col = int32(tail) - 1
 				temp.val = int32(weight)
 
 				colCnt[head-1]++
 
-				cnt++
 				tupleArray[cnt] = temp
+				cnt++
 
 			}
 		}
@@ -131,9 +133,8 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	for idx = 0; idx < numEdges; idx++ {
 		curr := int(tupleArray[idx].row)
 		if curr != prev {
-
-			rowCnt++
 			RowArray[rowCnt] = int32(idx)
+			rowCnt++
 			prev = curr
 		}
 		ColArray[idx] = tupleArray[idx].col
