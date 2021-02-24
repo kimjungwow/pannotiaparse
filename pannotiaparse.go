@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type CsrArraysT struct {
@@ -84,13 +85,13 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			fmt.Printf("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
 			tupleArray = make([]cooedgetuple, numEdges)
 		} else if lineno > 0 { //from the second line
-			var punctuation = []rune{' ', ',', '.', '-'}
 
-			words := Create(line, punctuation)
+			// Although pannotia's parse.cpp used " ,.-" for strtok(),
+			// it seems only " " is used in given graph files
+			words := strings.Split(line, " ")
 			for _, pch := range words {
-				// fmt.Println(pch)
-				head := int(lineno)
 				tail, _ := strconv.Atoi(pch)
+				head := int(lineno)
 				if tail <= 0 {
 					break
 				}
@@ -133,7 +134,6 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	for idx = 0; idx < numEdges; idx++ {
 		curr := tupleArray[idx].row
 		if curr != prev {
-			fmt.Printf("%d|%d|%d|%d\n", curr, prev, rowCnt, idx)
 			RowArray[rowCnt] = int32(idx)
 			rowCnt++
 			prev = curr
@@ -143,13 +143,6 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 	}
 	RowArray[rowCnt] = int32(idx)
-
-	//TODO
-	// if rowCnt < numNodes+1 {
-	// 	RowArray[rowCnt] = int32(idx)
-	// } else {
-	// 	ColArray[rowCnt-numNodes-1] = int32(idx)
-	// }
 
 	csr := new(CsrArraysT)
 	csr.RowArray = make([]int32, numNodes+1)
@@ -161,57 +154,6 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	csr.dataArray = dataArray
 	csr.colCnt = colCnt
 	return csr
-}
-
-// https://github.com/dannav/tokenize/blob/master/tokenize.go
-
-//Create takes any text as string, tokenization runes, and returns a slice of string tokens, where each item in the result set are the tokenized words followed by the runes to tokenize on in order.
-func Create(text string, tokenizeon []rune) []string {
-	resultSet := []string{}
-	textAsRune := []rune(text)
-	i := 0
-
-	for len(textAsRune) > 0 {
-		r := textAsRune[i]
-
-		if RuneIndexOf(tokenizeon, r) > -1 {
-			setItem := textAsRune[:i]
-			resultSet = append(resultSet, string(removePad(setItem)))
-			resultSet = append(resultSet, string(textAsRune[i:i+1]))
-
-			textAsRune = textAsRune[i+1:]
-			i = 0
-		}
-
-		i++
-	}
-
-	return resultSet
-}
-
-// RuneIndexOf returns the index of a rune in a slice of runes or -1 if it doesn't exist
-func RuneIndexOf(r []rune, el rune) int {
-	for i, e := range r {
-		if el == e {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func removePad(r []rune) []rune {
-	if len(r) > 0 {
-		if r[0] == ' ' {
-			r = r[1:]
-		}
-
-		if r[len(r)-1] == ' ' {
-			r = r[:len(r)-2]
-		}
-	}
-
-	return r
 }
 
 func main() {
