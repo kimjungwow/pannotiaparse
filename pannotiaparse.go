@@ -128,11 +128,12 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	dataArray := make([]int32, numEdges)
 
 	rowCnt := 0
-	prev := -1
+	prev := int32(-1)
 	var idx int
 	for idx = 0; idx < numEdges; idx++ {
-		curr := int(tupleArray[idx].row)
+		curr := tupleArray[idx].row
 		if curr != prev {
+			fmt.Printf("%d|%d|%d|%d\n", curr, prev, rowCnt, idx)
 			RowArray[rowCnt] = int32(idx)
 			rowCnt++
 			prev = curr
@@ -142,6 +143,13 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 	}
 	RowArray[rowCnt] = int32(idx)
+
+	//TODO
+	// if rowCnt < numNodes+1 {
+	// 	RowArray[rowCnt] = int32(idx)
+	// } else {
+	// 	ColArray[rowCnt-numNodes-1] = int32(idx)
+	// }
 
 	csr := new(CsrArraysT)
 	csr.RowArray = make([]int32, numNodes+1)
