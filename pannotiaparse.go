@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"sort"
 	"strconv"
 )
 
@@ -82,8 +81,8 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 			fmt.Printf("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
 			tupleArray = make([]cooedgetuple, numEdges)
-		} else { //from the second line
-			var punctuation = []rune{'.', '-', ',', ' '}
+		} else if lineno > 0 { //from the second line
+			var punctuation = []rune{' ', ',', '.', '-'}
 
 			words := Create(line, punctuation)
 			for _, pch := range words {
@@ -118,9 +117,9 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		log.Fatal(err)
 	}
 
-	sort.Slice(tupleArray[:numEdges], func(i, j int) bool {
-		return tupleArray[i].row < tupleArray[j].row
-	})
+	// sort.Slice(tupleArray[:numEdges], func(i, j int) bool {
+	// 	return tupleArray[i].row < tupleArray[j].row
+	// })
 
 	RowArray := make([]int32, numNodes+1)
 	ColArray := make([]int32, numEdges)
