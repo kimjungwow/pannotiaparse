@@ -139,7 +139,6 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		}
 		ColArray[idx] = tupleArray[idx].col
 		dataArray[idx] = tupleArray[idx].val
-
 	}
 	RowArray[rowCnt] = int32(idx)
 
