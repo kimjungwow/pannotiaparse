@@ -108,7 +108,6 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 				tupleArray[cnt] = temp
 				cnt++
-
 			}
 		}
 
