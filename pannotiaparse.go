@@ -103,8 +103,8 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 				colCnt[head-1]++
 
-				tupleArray[cnt] = temp
 				cnt++
+				tupleArray[cnt] = temp
 
 			}
 		}
@@ -132,8 +132,8 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		curr := int(tupleArray[idx].row)
 		if curr != prev {
 
-			RowArray[rowCnt] = int32(idx)
 			rowCnt++
+			RowArray[rowCnt] = int32(idx)
 			prev = curr
 		}
 		ColArray[idx] = tupleArray[idx].col
