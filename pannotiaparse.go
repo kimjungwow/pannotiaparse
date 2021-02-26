@@ -17,7 +17,7 @@ func doCompare(elem1, elem2 cooedgetuple) bool {
 }
 
 type CsrArraysT struct {
-	ColArray, dataArray, colCnt []int32
+	ColArray, DataArray, ColCnt []int32
 	RowArray                    []int32
 }
 
@@ -28,17 +28,17 @@ func (a *CsrArraysT) freeArrays() {
 	if !reflect.ValueOf(a.ColArray).IsNil() {
 		a.ColArray = a.ColArray[:0]
 	}
-	if !reflect.ValueOf(a.dataArray).IsNil() {
-		a.dataArray = a.dataArray[:0]
+	if !reflect.ValueOf(a.DataArray).IsNil() {
+		a.DataArray = a.DataArray[:0]
 	}
-	if !reflect.ValueOf(a.colCnt).IsNil() {
-		a.colCnt = a.colCnt[:0]
+	if !reflect.ValueOf(a.ColCnt).IsNil() {
+		a.ColCnt = a.ColCnt[:0]
 	}
 }
 
 type ellArraysT struct {
 	maxHeight, numNodes int
-	ColArray, dataArray []int
+	ColArray, DataArray []int
 }
 
 type cooedgetuple struct {
@@ -49,7 +49,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	cnt := 0
 	numEdges := 0
 	numNodes := 0
-	var colCnt []int32
+	var ColCnt []int32
 
 	var tupleArray []cooedgetuple
 	file, err := os.Open(tmpchar)
@@ -72,10 +72,10 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 		}
 		if lineno == 0 {
 			fmt.Sscanf(line, "%d %d", pNumNodes, pNumEdges)
-			colCnt = make([]int32, *pNumNodes)
+			ColCnt = make([]int32, *pNumNodes)
 
 			for i := 0; i < *pNumNodes; i++ {
-				colCnt[i] = 0
+				ColCnt[i] = 0
 			}
 
 			if !directed {
@@ -109,7 +109,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 				temp.col = int32(tail) - 1
 				temp.val = int32(weight)
 
-				colCnt[head-1]++
+				ColCnt[head-1]++
 
 				tupleArray[cnt] = temp
 				cnt++
@@ -130,7 +130,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 
 	RowArray := make([]int32, numNodes+1)
 	ColArray := make([]int32, numEdges)
-	dataArray := make([]int32, numEdges)
+	DataArray := make([]int32, numEdges)
 
 	rowCnt := 0
 	prev := int32(-1)
@@ -143,19 +143,19 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 			prev = curr
 		}
 		ColArray[idx] = tupleArray[idx].col
-		dataArray[idx] = tupleArray[idx].val
+		DataArray[idx] = tupleArray[idx].val
 	}
 	RowArray[rowCnt] = int32(idx)
 
 	csr := new(CsrArraysT)
 	csr.RowArray = make([]int32, numNodes+1)
 	csr.ColArray = make([]int32, numEdges)
-	csr.dataArray = make([]int32, numEdges)
-	csr.colCnt = make([]int32, *pNumNodes)
+	csr.DataArray = make([]int32, numEdges)
+	csr.ColCnt = make([]int32, *pNumNodes)
 	csr.RowArray = RowArray
 	csr.ColArray = ColArray
-	csr.dataArray = dataArray
-	csr.colCnt = colCnt
+	csr.DataArray = DataArray
+	csr.ColCnt = ColCnt
 	return csr
 }
 
@@ -243,7 +243,7 @@ func ParseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 
 	RowArray := make([]int32, numNodes+1)
 	ColArray := make([]int32, numEdges)
-	dataArray := make([]int32, numEdges)
+	DataArray := make([]int32, numEdges)
 
 	rowCnt := 0
 	prev := int32(-1)
@@ -256,7 +256,7 @@ func ParseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 			prev = curr
 		}
 		ColArray[idx] = tupleArray[idx].col
-		dataArray[idx] = tupleArray[idx].val
+		DataArray[idx] = tupleArray[idx].val
 	}
 
 	RowArray[rowCnt] = int32(idx)
@@ -264,10 +264,10 @@ func ParseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 	csr := new(CsrArraysT)
 	csr.RowArray = make([]int32, numNodes+1)
 	csr.ColArray = make([]int32, numEdges)
-	csr.dataArray = make([]int32, numEdges)
+	csr.DataArray = make([]int32, numEdges)
 	csr.RowArray = RowArray
 	csr.ColArray = ColArray
-	csr.dataArray = dataArray
+	csr.DataArray = DataArray
 	return csr
 }
 
