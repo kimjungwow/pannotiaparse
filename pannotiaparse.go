@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 )
 
@@ -36,6 +37,16 @@ type ellArraysT struct {
 
 type cooedgetuple struct {
 	row, col, val int
+}
+
+type Cooedgetuples []cooedgetuple
+
+func (s Cooedgetuples) Len() int { return len(s) }
+func (s Cooedgetuples) Less(i, j int) bool {
+	return s[i].row < s[j].row
+}
+func (s Cooedgetuples) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
@@ -137,6 +148,102 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	csr.ColArray = ColArray
 	csr.dataArray = dataArray
 	csr.colCnt = colCnt
+	return csr
+}
+
+func parseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
+	cnt := 0
+	numNodes := 0
+	numEdges := 0
+	var sp [2]byte
+	var a, p byte
+
+	var tupleArray []cooedgetuple
+
+	file, err := os.Open(tmpchar)
+	// file, err := os.Open("/path/to/file.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineno := 0
+	for scanner.Scan() {
+		var head, tail int
+		weight := 0
+		var temp cooedgetuple
+
+		line := scanner.Text()
+		switch line[0] {
+		case 'c':
+			break
+		case 'p':
+			fmt.Sscanf(line, "%c %s %d %d", &p, sp, pNumNodes, pNumEdges)
+			if !directed {
+				*pNumEdges = *pNumEdges * 2
+				print("This is an undirected graph\n")
+			} else {
+				print("This is a directed graph\n")
+			}
+			numNodes = *pNumNodes
+			numEdges = *pNumEdges
+
+			fmt.Printf("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
+			tupleArray = make([]cooedgetuple, numEdges)
+			break
+		case 'a':
+			fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
+			if tail == head {
+				fmt.Printf("reporting self loop\n")
+			}
+			temp.row = head - 1
+			temp.col = tail - 1
+			temp.val = weight
+			tupleArray[cnt] = temp
+			cnt += 1
+			if !directed {
+				temp.row = tail - 1
+				temp.col = head - 1
+				temp.val = weight
+				tupleArray[cnt] = temp
+				cnt += 1
+			}
+
+			break
+		default:
+			fmt.Printf("Error! existing loop!\n")
+			break
+		}
+		lineno++
+	}
+	sort.Stable(Cooedgetuples(tupleArray))
+
+	row_array := make([]int, numNodes+1)
+	col_array := make([]int, numEdges)
+	data_array := make([]int, numEdges)
+
+	row_cnt := 0
+	prev := -1
+	var idx int
+	for idx = 0; idx < numEdges; idx++ {
+		curr := tupleArray[idx].row
+		if curr != prev {
+			row_array[row_cnt] = idx
+			row_cnt += 1
+			prev = curr
+		}
+		col_array[idx] = tupleArray[idx].col
+		data_array[idx] = tupleArray[idx].val
+	}
+	row_array[row_cnt] = idx
+
+	tupleArray = nil //free
+
+	csr := new(CsrArraysT)
+	csr.RowArray = row_array
+	csr.ColArray = col_array
+	csr.dataArray = data_array
 	return csr
 }
 
