@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 type CsrArraysT struct {
@@ -184,8 +185,9 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 		case 'c':
 			break
 		case 'p':
-			var punctuation = []rune{'.', '-', ',', ' '}
-			words := Create(line, punctuation)
+			fmt.Printf("line : %s\n",line)
+			words:= strings.Split(line," ")
+			// words := Create(line, punctuation)
 			for _, word := range words{ 
 				if number, err:=strconv.Atoi(word); err==nil{
 					if *pNumNodes==0{
@@ -208,9 +210,7 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 			tupleArray = make([]cooedgetuple, numEdges)
 			break
 		case 'a':
-
-			var punctuation = []rune{'.', '-', ',', ' '}
-			words := Create(line, punctuation)
+			words := strings.Split(line," ")
 			for _, word := range words{ 
 				if number, err:=strconv.Atoi(word); err==nil{
 					if head==0{
@@ -222,6 +222,8 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 					}
 				}
 			}
+			// fmt.Printf("Line : %s head : %d tail : %d weight : %d\n",
+			// line,head,tail,weight)
 
 			//fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
 			if tail == head {
