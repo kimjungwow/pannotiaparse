@@ -161,8 +161,9 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 	cnt := 0
 	numNodes := 0
 	numEdges := 0
-	var sp [2]byte
-	var a, p byte
+	var sp string
+	var p string
+	var a byte
 
 	var tupleArray []cooedgetuple
 
@@ -187,7 +188,7 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 			break
 		case 'p':
 			fmt.Printf("line  %s\n",line)
-			fmt.Sscanf(line, "%c %s %d %d", &p, sp, pNumNodes, pNumEdges)
+			fmt.Sscanf(line, "%s %s %d %d", p, sp, pNumNodes, pNumEdges)
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
 				print("This is an undirected graph\n")
