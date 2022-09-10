@@ -156,6 +156,115 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 	return csr
 }
 
+
+func parseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
+	cnt := 0
+	numNodes := 0
+	numEdges := 0
+	var sp [2]byte
+	var a, p byte
+
+	var tupleArray []cooedgetuple
+
+	file, err := os.Open(tmpchar)
+	// file, err := os.Open("/path/to/file.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lineno := 0
+	for scanner.Scan() {
+		var head, tail int
+		weight := 0
+		var temp cooedgetuple
+
+		line := scanner.Text()
+		switch line[0] {
+		case 'c':
+			break
+		case 'p':
+			fmt.Sscanf(line, "%c %s %d %d", &p, sp, pNumNodes, pNumEdges)
+			if !directed {
+				*pNumEdges = *pNumEdges * 2
+				print("This is an undirected graph\n")
+			} else {
+				print("This is a directed graph\n")
+			}
+			numNodes = *pNumNodes
+			numEdges = *pNumEdges
+
+			fmt.Printf("Read from file: num_nodes = %d, num_edges = %d\n", numNodes, numEdges)
+			tupleArray = make([]cooedgetuple, numEdges)
+			break
+		case 'a':
+			fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
+			if tail == head {
+				fmt.Printf("reporting self loop\n")
+			}
+			temp.row = int32(tail - 1)
+			temp.col = int32(head - 1)
+			temp.val = int32(weight)
+			tupleArray[cnt] = temp
+			cnt += 1
+			if !directed {
+				temp.row = int32(tail - 1)
+				temp.col = int32(head - 1)
+				temp.val = int32(weight)
+				tupleArray[cnt] = temp
+				cnt += 1
+			}
+
+			break
+		default:
+			fmt.Printf("Error! existing loop!\n")
+			break
+		}
+		lineno++
+	}
+	sort.Stable(Cooedgetuples(tupleArray))
+
+	row_array := make([]int32, numNodes+1)
+	col_array := make([]int32, numEdges)
+	data_array := make([]int32, numEdges)
+
+	row_cnt := 0
+	prev := int32(-1)
+	var idx int
+	for idx = 0; idx < numEdges; idx++ {
+		curr := tupleArray[idx].row
+		if curr != prev {
+			row_array[row_cnt] = int32(idx)
+			row_cnt += 1
+			prev = curr
+		}
+		col_array[idx] = tupleArray[idx].col
+		data_array[idx] = tupleArray[idx].val
+	}
+
+	for row_cnt <=  numNodes{
+		row_array[row_cnt] = int32(idx)
+		row_cnt+=1
+	}
+
+	tupleArray = nil //free
+
+	csr := new(CsrArraysT)
+	csr.RowArray = make([]int32, *pNumNodes+1)
+	csr.ColArray = make([]int32, *pNumEdges)
+	csr.DataArray = make([]int32, *pNumEdges)
+	csr.ColCnt = make([]int32, *pNumEdges)
+
+	csr.RowArray = row_array
+	csr.ColArray = col_array
+	csr.DataArray = data_array
+	//csr.ColCnt = col
+	return csr
+}
+
+
+
 func parseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
 	cnt := 0
 	numNodes := 0
