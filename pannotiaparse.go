@@ -189,6 +189,7 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 		case 'p':
 			fmt.Printf("line  %s\n",line)
 			fmt.Sscanf(line, "%s %s %d %d", p, sp, pNumNodes, pNumEdges)
+			fmt.Printf("p : %s sp : %s NumNodes : %d NumEdges : %d\n",p,sp,*pNumNodes,*pNumEdges)
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
 				print("This is an undirected graph\n")
