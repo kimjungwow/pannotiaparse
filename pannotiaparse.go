@@ -161,9 +161,6 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 	cnt := 0
 	numNodes := 0
 	numEdges := 0
-	var sp string
-	var p string
-	var a byte
 
 	var tupleArray []cooedgetuple
 
@@ -187,9 +184,17 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 		case 'c':
 			break
 		case 'p':
-			fmt.Printf("line  %s\n",line)
-			fmt.Sscanf(line, "%s %s %d %d", p, sp, pNumNodes, pNumEdges)
-			fmt.Printf("p : %s sp : %s NumNodes : %d NumEdges : %d\n",p,sp,*pNumNodes,*pNumEdges)
+			var punctuation = []rune{'.', '-', ',', ' '}
+			words := Create(line, punctuation)
+			for _, word := range words{ 
+				if number, err:=strconv.Atoi(word); err==nil{
+					if *pNumNodes==0{
+						*pNumNodes = number
+					}else{
+						*pNumEdges = number
+					}
+				}
+			}
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
 				print("This is an undirected graph\n")
@@ -203,7 +208,22 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 			tupleArray = make([]cooedgetuple, numEdges)
 			break
 		case 'a':
-			fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
+
+			var punctuation = []rune{'.', '-', ',', ' '}
+			words := Create(line, punctuation)
+			for _, word := range words{ 
+				if number, err:=strconv.Atoi(word); err==nil{
+					if head==0{
+						head = number
+					}else if tail==0{
+						tail = number
+					}else if weight==0{
+						weight= number
+					}
+				}
+			}
+
+			//fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
 			if tail == head {
 				fmt.Printf("reporting self loop\n")
 			}
