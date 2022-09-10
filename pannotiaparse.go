@@ -157,7 +157,7 @@ func ParseMetis(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrAr
 }
 
 
-func parseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
+func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArraysT {
 	cnt := 0
 	numNodes := 0
 	numEdges := 0
