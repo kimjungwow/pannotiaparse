@@ -167,6 +167,7 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 	var tupleArray []cooedgetuple
 
 	file, err := os.Open(tmpchar)
+	fmt.Printf("Read Filename : %s\n",tmpchar)
 	// file, err := os.Open("/path/to/file.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -185,6 +186,7 @@ func ParseCOO_transpose(tmpchar string, pNumNodes, pNumEdges *int, directed bool
 		case 'c':
 			break
 		case 'p':
+			fmt.Printf("line  %s\n",line)
 			fmt.Sscanf(line, "%c %s %d %d", &p, sp, pNumNodes, pNumEdges)
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
