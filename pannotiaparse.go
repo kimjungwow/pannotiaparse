@@ -295,8 +295,6 @@ func parseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 	cnt := 0
 	numNodes := 0
 	numEdges := 0
-	var sp [2]byte
-	var a, p byte
 
 	var tupleArray []cooedgetuple
 
@@ -319,7 +317,18 @@ func parseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 		case 'c':
 			break
 		case 'p':
-			fmt.Sscanf(line, "%c %s %d %d", &p, sp, pNumNodes, pNumEdges)
+
+			words:= strings.Split(line," ")
+			// words := Create(line, punctuation)
+			for _, word := range words{ 
+				if number, err:=strconv.Atoi(word); err==nil{
+					if *pNumNodes==0{
+						*pNumNodes = number
+					}else{
+						*pNumEdges = number
+					}
+				}
+			}
 			if !directed {
 				*pNumEdges = *pNumEdges * 2
 				print("This is an undirected graph\n")
@@ -333,7 +342,20 @@ func parseCOO(tmpchar string, pNumNodes, pNumEdges *int, directed bool) *CsrArra
 			tupleArray = make([]cooedgetuple, numEdges)
 			break
 		case 'a':
-			fmt.Sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight)
+
+			words := strings.Split(line," ")
+			for _, word := range words{ 
+				if number, err:=strconv.Atoi(word); err==nil{
+					if head==0{
+						head = number
+					}else if tail==0{
+						tail = number
+					}else if weight==0{
+						weight= number
+					}
+				}
+			}
+		
 			if tail == head {
 				fmt.Printf("reporting self loop\n")
 			}
